@@ -98,9 +98,6 @@ Para criar geofences no Android, você pode seguir este resumo simplificado base
       }
       ```
 
-Este é um resumo simplificado dos passos necessários para implementar geofences no Android. Certifique-se de seguir as melhores práticas de segurança e privacidade ao lidar com a localização do usuário.
-
-
 
 Referências:
 
