@@ -65,9 +65,11 @@ Adicione as permissões necessárias no arquivo `AndroidManifest.xml`:
 - Configure a solicitação de geofencing.
 
 ```kotlin     
- fun getGeofencingRequest(): GeofencingRequest {  return GeofencingRequest.Builder().apply {      
+ fun getGeofencingRequest(): GeofencingRequest { 
+  return GeofencingRequest.Builder().apply {      
   setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)      
-addGeofences(geofenceList) }.build() }    
+addGeofences(geofenceList) }.build() 
+}    
    
 ``` 
 **Criar um PendingIntent**:
