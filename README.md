@@ -112,8 +112,9 @@ Adicionar ao manifest
 
 Referências:
 
-https://www.gps-coordinates.net/ https://developer.android.com/develop/sensors-and-location/location/geofencing#kotlin
-https://www.kodeco.com/7372-geofencing-api-tutorial-for-android/page/2
+https://www.gps-coordinates.net/ 
+https://developer.android.com/develop/sensors-and-location/location/geofencing#kotlin
+https://www.kodeco.com/7372-geofencing-api-tutorial-for-android/page/1
 
 
 
