@@ -34,10 +34,10 @@ Adicionar ao manifest
 
 
 4. **Habilitar Localização**:
-   - Verifique se os serviços de localização estão habilitados e peça permissão ao usuário, se necessário.
+    - Verifique se os serviços de localização estão habilitados e peça permissão ao usuário, se necessário.
 
 5. **Criar e Configurar Geofence**:
-   - Use a classe `Geofence` para definir as propriedades da geofence, como o raio e a duração.
+    - Use a classe `Geofence` para definir as propriedades da geofence, como o raio e a duração.
 
   ```kotlin    
 	 Geofence.Builder()  
@@ -48,23 +48,23 @@ Adicionar ao manifest
 	        ALL_GEOFENCES[i].radius  
   )  
 	  .setExpirationDuration(GEOFENCE_EXPIRATION_IN_MILLISECONDS)  
-  .	setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or 	Geofence.GEOFENCE_TRANSITION_EXIT)  
+  .	setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)  
 	  .build()
 
   ```  
 6. **Adicionar Geofence ao GeofencingClient**:
-   - Crie uma lista de geofences e adicione-as ao `GeofencingClient`.
-      ```kotlin  
-       fun geofencingClient(context: Context) = LocationServices.getGeofencingClient(context)
-       geofencingClient = geofencingClient(this)
-       registerGeofences(applicationContext, geofencePendingIntent)
-		geofencingClient.addGeofences(getGeofencingRequest(), geofencePendingIntent).run {  
-      addOnSuccessListener {  
-      Log.d(TAG, "Geofences added")  
-      }  
-      addOnFailureListener {  
-      Log.d(TAG, "Geofences failed")  
-      }  
+    - Crie uma lista de geofences e adicione-as ao `GeofencingClient`.
+       ```kotlin  
+        fun geofencingClient(context: Context) = LocationServices.getGeofencingClient(context)
+        geofencingClient = geofencingClient(this)
+        registerGeofences(applicationContext, geofencePendingIntent)
+         geofencingClient.addGeofences(getGeofencingRequest(), geofencePendingIntent).run {  
+       addOnSuccessListener {  
+       Log.d(TAG, "Geofences added")  
+       }  
+       addOnFailureListener {  
+       Log.d(TAG, "Geofences failed")  
+       }  
    }
 
 ```  `
@@ -83,18 +83,18 @@ Adicionar ao manifest
 
 ```
 8. **Criar um PendingIntent**:
-   - Crie um `PendingIntent` para lidar com as transições de geofence.
-      ```kotlin  
-      private val geofencePendingIntent: PendingIntent by lazy {  
-      val intent = Intent(this, GeofenceBroadcastReceiver::class.java)  
-      intent.action = ACTION_GEOFENCE_EVENT  
-      val pendingFlags = if (Build.VERSION.SDK_INT >= 23) {  
-      PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE  
-      } else {  
-      PendingIntent.FLAG_UPDATE_CURRENT  
-      }  
-      PendingIntent.getBroadcast(this, 0, intent, pendingFlags)  
-      }
+    - Crie um `PendingIntent` para lidar com as transições de geofence.
+       ```kotlin  
+       private val geofencePendingIntent: PendingIntent by lazy {  
+       val intent = Intent(this, GeofenceBroadcastReceiver::class.java)  
+       intent.action = ACTION_GEOFENCE_EVENT  
+       val pendingFlags = if (Build.VERSION.SDK_INT >= 23) {  
+       PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE  
+       } else {  
+       PendingIntent.FLAG_UPDATE_CURRENT  
+       }  
+       PendingIntent.getBroadcast(this, 0, intent, pendingFlags)  
+       }
 
 ```  `enter code here`
 
@@ -112,7 +112,8 @@ Adicionar ao manifest
 
 Referências:
 
-https://www.gps-coordinates.net/ https://developer.android.com/develop/sensors-and-location/location/geofencing#kotlin https://www.kodeco.com/7372-geofencing-api-tutorial-for-android/page/2
+https://www.gps-coordinates.net/ https://developer.android.com/develop/sensors-and-location/location/geofencing#kotlin
+https://www.kodeco.com/7372-geofencing-api-tutorial-for-android/page/2
 
 
 
