@@ -90,11 +90,15 @@ addGeofences(geofenceList) }.build()
 
 
 - Crie uma classe que estende `BroadcastReceiver` para lidar com os eventos de transição da geofence.
- ```kotlin  class GeofenceBroadcastReceiver : BroadcastReceiver() {      
+ ```kotlin  
+ class GeofenceBroadcastReceiver : BroadcastReceiver() {      
       override fun onReceive(context: Context, intent: Intent) {    
 .... } 
 ```   
 Referências:
 
-https://www.gps-coordinates.net/  
-https://developer.android.com/develop/sensors-and-location/location/geofencing#kotlin https://www.kodeco.com/7372-geofencing-api-tutorial-for-android/page/1
+https://www.gps-coordinates.net/ 
+
+https://developer.android.com/develop/sensors-and-location/location/geofencing#kotlin
+
+https://www.kodeco.com/7372-geofencing-api-tutorial-for-android/page/1
