@@ -69,8 +69,10 @@ Adicione as permissões necessárias no arquivo `AndroidManifest.xml`:
   setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)      
 addGeofences(geofenceList) }.build() }    
    
-``` **Criar um PendingIntent**:  
-- Crie um `PendingIntent` para lidar com as transições de geofence. ```kotlin       private val geofencePendingIntent: PendingIntent by lazy {      
+``` 
+**Criar um PendingIntent**:
+- Crie um `PendingIntent` para lidar com as transições de geofence.
+```kotlin       private val geofencePendingIntent: PendingIntent by lazy {      
   val intent = Intent(this, GeofenceBroadcastReceiver::class.java)      
   intent.action = ACTION_GEOFENCE_EVENT      
   val pendingFlags = if (Build.VERSION.SDK_INT >= 23) {      
@@ -81,7 +83,7 @@ addGeofences(geofenceList) }.build() }
   PendingIntent.getBroadcast(this, 0, intent, pendingFlags)      
   }  
   
-```   
+``` 
 **Implementar BroadcastReceiver**:
 
 
