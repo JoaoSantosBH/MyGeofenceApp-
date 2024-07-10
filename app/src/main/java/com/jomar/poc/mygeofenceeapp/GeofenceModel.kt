@@ -1,4 +1,4 @@
-package com.jomar.poc.mygeofenceeapp.ui.theme
+package com.jomar.poc.mygeofenceeapp
 
 data class GeofenceModel(
     val id: String = "",

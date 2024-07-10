@@ -11,7 +11,7 @@ import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
-import com.jomar.poc.mygeofenceeapp.ui.theme.GeofenceModel.Companion.ALL_GEOFENCES
+import com.jomar.poc.mygeofenceeapp.GeofenceModel.Companion.ALL_GEOFENCES
 
 val geofenceList = mutableListOf<Geofence>()
 
