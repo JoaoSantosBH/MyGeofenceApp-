@@ -8,64 +8,97 @@ Click _Enable_, or _Manage_ if already enabled.
 Click on _Credentials_, _Credentials in the API Manager_, _Create credentials_ and then choose _API key_.
 1.  Copy your API key value. In your project, open  `debug/res/values/google_maps_api.xml`  and replace  `YOUR_KEY_HERE`  with the copied value.
 
-### ADD LIB
-implementation 'com.google.android.gms:play-services-location:16.0.0'
 
-## Creating a Geofence
+Para criar geofences no Android, você pode seguir este resumo simplificado baseado no tutorial da Kodeco:
 
-To manipulate geofences, you need to use the  _GeofencingClient_, so open  _ReminderRepository.kt_  and add a new property:
+1. **Configuração do Projeto**:
+    - Adicione as dependências necessárias no arquivo `build.gradle`:
+      ```gradle
+      implementation 'com.google.android.gms:play-services-location:18.0.0'
+      ```
 
-You’ll also need to import  `com.google.android.gms.location.LocationServices`.
+2. **Permissões**:
+    - Adicione as permissões necessárias no arquivo `AndroidManifest.xml`:
+      ```xml
+      <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+      <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+      ```
 
-lateinit var geofencingClient: GeofencingClient
+3. **Habilitar Localização**:
+    - Verifique se os serviços de localização estão habilitados e peça permissão ao usuário, se necessário.
 
-fun geofencingClient(context: Context) = LocationServices.getGeofencingClient(context)
+4. **Criar e Configurar Geofence**:
+    - Use a classe `Geofence` para definir as propriedades da geofence, como o raio e a duração.
+      ```java
+      Geofence geofence = new Geofence.Builder()
+          .setRequestId("myGeofenceId")
+          .setCircularRegion(latitude, longitude, radius)
+          .setExpirationDuration(Geofence.NEVER_EXPIRE)
+          .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
+          .build();
+      ```
 
-geofencingClient = geofencingClient(this)  
-if (geofenceList.isEmpty()) {  
-populateGeoFanceList()  
-}  
-registerGeofences(applicationContext, geofencePendingIntent)
+5. **Adicionar Geofence ao GeofencingClient**:
+    - Crie uma lista de geofences e adicione-as ao `GeofencingClient`.
+      ```java
+      GeofencingClient geofencingClient = LocationServices.getGeofencingClient(this);
+      geofencingClient.addGeofences(getGeofencingRequest(), getGeofencePendingIntent())
+          .addOnSuccessListener(this, new OnSuccessListener<Void>() {
+              @Override
+              public void onSuccess(Void aVoid) {
+                  // Geofence adicionada com sucesso
+              }
+          })
+          .addOnFailureListener(this, new OnFailureListener() {
+              @Override
+              public void onFailure(@NonNull Exception e) {
+                  // Falha ao adicionar geofence
+              }
+          });
+      ```
 
-### Building the Geofence
+6. **Configurar GeofencingRequest**:
+    - Configure a solicitação de geofencing.
+      ```java
+      private GeofencingRequest getGeofencingRequest() {
+          GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
+          builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
+          builder.addGeofence(geofence);
+          return builder.build();
+      }
+      ```
 
-Geofence.Builder()  
-.setRequestId(ALL_GEOFENCES[i].id)  
-.setCircularRegion(  
-ALL_GEOFENCES[i].latitude,  
-ALL_GEOFENCES[i].longitude,  
-ALL_GEOFENCES[i].radius  
-)  
-.setExpirationDuration(GEOFENCE_EXPIRATION_IN_MILLISECONDS)  
-.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)  
-.build()
-Take a look at the  `Geofence.Builder`  code in your new method:
+7. **Criar um PendingIntent**:
+    - Crie um `PendingIntent` para lidar com as transições de geofence.
+      ```java
+      private PendingIntent getGeofencePendingIntent() {
+          Intent intent = new Intent(this, GeofenceBroadcastReceiver.class);
+          return PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+      }
+      ```
 
-1.  _RequestId_: This id uniquely identifies the geofence within your app. You obtain this from the reminder model.
-2.  _latitude_,  _longitude_  and  _radius_: You also get these from the reminder model at the top of the new method.
-3.  _TransitionType_: To trigger an event when the user enters the geofence, use  `GEOFENCE_TRANSITION_ENTER`. Other options are  `GEOFENCE_TRANSITION_EXIT`  and  `GEOFENCE_TRANSITION_DWELL`. You can learn more about transition options  [here](https://developers.google.com/android/reference/com/google/android/gms/location/GeofencingRequest.Builder.html#setInitialTrigger(int)).
-4.  _ExpirationDuration_: Use  `NEVER_EXPIRE`  so this geofence will exist until the user removes it. The other option is to enter a duration (ms) after which the geofence will expire.
+8. **Implementar BroadcastReceiver**:
+    - Crie uma classe que estende `BroadcastReceiver` para lidar com os eventos de transição da geofence.
+      ```java
+      public class GeofenceBroadcastReceiver extends BroadcastReceiver {
+          @Override
+          public void onReceive(Context context, Intent intent) {
+              GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
+              if (geofencingEvent.hasError()) {
+                  // Lidar com erro
+                  return;
+              }
+ 
+              int geofenceTransition = geofencingEvent.getGeofenceTransition();
+              if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
+                  geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
+                  // Lidar com transição de geofence
+              }
+          }
+      }
+      ```
 
-
-### Building the Geofence Request
-
-
-### Building the Geofence Pending Intent
-
-Create the file  _GeofenceBroadcastReceiver.kt_  and add the following code:
-
-Manifest
-
-<receiver
-android:name=".GeofenceBroadcastReceiver"
-android:enabled="true"
-android:exported="true" />
-<service
-android:name=".GeofenceTransitionsJobIntentService"
-android:exported="true"
-android:permission="android.permission.BIND_JOB_SERVICE" />
-
-## Removing a Geofence
+Este é um resumo simplificado dos passos necessários para implementar geofences no Android. Certifique-se de seguir as melhores práticas de segurança e privacidade ao lidar com a localização do usuário.
 
 
 
