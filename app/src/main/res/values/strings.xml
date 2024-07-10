@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">MyGeoFenceApp</string>
+    <string name="apikey">AIzaSyAD5TSQ5oxjdGNW5mI54JWbwAFB6hil2sM\n</string>
+    <string name="geofence_transition_invalid_type">invalid type</string>
+    <string name="geofence_transition_entered">Entrando na geofence</string>
+    <string name="geofence_transition_exited">Saindo da Geofence\n</string>
+    <string name="unknown_geofence_transition">Sem nada por aqui</string>
+    <string name="channel_name">Geofence</string>
+    <string name="channel_description">Canal de notificacao</string>
+</resources>
