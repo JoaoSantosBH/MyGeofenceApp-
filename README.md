@@ -1,106 +1,118 @@
+
 # MyGeofenceApp
 Geofence app with android kotlin
-### Obtaining a Google Maps API Key
-Open _Google Cloud Platform_ and [create a new project]
-Select _APIs & Services ▸ Library from the navigation menu_.
-Select _Maps SDK for Android_.  
-Click _Enable_, or _Manage_ if already enabled.
+
+
+**Obter uma Google Maps API key**:
+Open _Google Cloud Platform_ and [create a new project]  
+Select _APIs & Services ▸ Library from the navigation menu_.  
+Select _Maps SDK for Android_.    
+Click _Enable_, or _Manage_ if already enabled.  
 Click on _Credentials_, _Credentials in the API Manager_, _Create credentials_ and then choose _API key_.
-1.  Copy your API key value. In your project, open  `debug/res/values/google_maps_api.xml`  and replace  `YOUR_KEY_HERE`  with the copied value.
+
+Adicionar ao manifest
+
+    <meta-data  
+      android:name="com.google.android.geo.API_KEY"  
+      android:value="@string/apikey" />
+
+**Configuração do Projeto**:
+- Adicione as dependências necessárias no arquivo `build.gradle`:
+   ```gradle  
+   implementation 'com.google.android.gms:play-services-location:18.0.0'  
+
+``
 
 
-Para criar geofences no Android, você pode seguir este resumo simplificado baseado no tutorial da Kodeco:
+**Permissões**:
+3. - Adicione as permissões necessárias no arquivo `AndroidManifest.xml`:
 
-1. **Configuração do Projeto**:
-    - Adicione as dependências necessárias no arquivo `build.gradle`:
-      ```gradle
-      implementation 'com.google.android.gms:play-services-location:18.0.0'
-      ```
+```xml  
+   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />  
+  <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />  
+```  
 
-2. **Permissões**:
-    - Adicione as permissões necessárias no arquivo `AndroidManifest.xml`:
-      ```xml
-      <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-      <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
-      ```
 
-3. **Habilitar Localização**:
-    - Verifique se os serviços de localização estão habilitados e peça permissão ao usuário, se necessário.
+4. **Habilitar Localização**:
+   - Verifique se os serviços de localização estão habilitados e peça permissão ao usuário, se necessário.
 
-4. **Criar e Configurar Geofence**:
-    - Use a classe `Geofence` para definir as propriedades da geofence, como o raio e a duração.
-      ```java
-      Geofence geofence = new Geofence.Builder()
-          .setRequestId("myGeofenceId")
-          .setCircularRegion(latitude, longitude, radius)
-          .setExpirationDuration(Geofence.NEVER_EXPIRE)
-          .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
-          .build();
-      ```
+5. **Criar e Configurar Geofence**:
+   - Use a classe `Geofence` para definir as propriedades da geofence, como o raio e a duração.
 
-5. **Adicionar Geofence ao GeofencingClient**:
-    - Crie uma lista de geofences e adicione-as ao `GeofencingClient`.
-      ```java
-      GeofencingClient geofencingClient = LocationServices.getGeofencingClient(this);
-      geofencingClient.addGeofences(getGeofencingRequest(), getGeofencePendingIntent())
-          .addOnSuccessListener(this, new OnSuccessListener<Void>() {
-              @Override
-              public void onSuccess(Void aVoid) {
-                  // Geofence adicionada com sucesso
-              }
-          })
-          .addOnFailureListener(this, new OnFailureListener() {
-              @Override
-              public void onFailure(@NonNull Exception e) {
-                  // Falha ao adicionar geofence
-              }
-          });
-      ```
+  ```kotlin    
+	 Geofence.Builder()  
+	  .setRequestId(ALL_GEOFENCES[i].id)  
+	  .setCircularRegion(  
+		      ALL_GEOFENCES[i].latitude,  
+	        ALL_GEOFENCES[i].longitude,  
+	        ALL_GEOFENCES[i].radius  
+  )  
+	  .setExpirationDuration(GEOFENCE_EXPIRATION_IN_MILLISECONDS)  
+  .	setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or 	Geofence.GEOFENCE_TRANSITION_EXIT)  
+	  .build()
 
-6. **Configurar GeofencingRequest**:
-    - Configure a solicitação de geofencing.
-      ```java
-      private GeofencingRequest getGeofencingRequest() {
-          GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
-          builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
-          builder.addGeofence(geofence);
-          return builder.build();
+  ```  
+6. **Adicionar Geofence ao GeofencingClient**:
+   - Crie uma lista de geofences e adicione-as ao `GeofencingClient`.
+      ```kotlin  
+       fun geofencingClient(context: Context) = LocationServices.getGeofencingClient(context)
+       geofencingClient = geofencingClient(this)
+       registerGeofences(applicationContext, geofencePendingIntent)
+		geofencingClient.addGeofences(getGeofencingRequest(), geofencePendingIntent).run {  
+      addOnSuccessListener {  
+      Log.d(TAG, "Geofences added")  
+      }  
+      addOnFailureListener {  
+      Log.d(TAG, "Geofences failed")  
+      }  
+   }
+
+```  `
+
+**Configurar GeofencingRequest**:
+- Configure a solicitação de geofencing.
+
+```kotlin  
+
+    fun getGeofencingRequest(): GeofencingRequest {  
+  return GeofencingRequest.Builder().apply {  
+  setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)  
+  addGeofences(geofenceList)  
+  }.build()  
+}
+
+```
+8. **Criar um PendingIntent**:
+   - Crie um `PendingIntent` para lidar com as transições de geofence.
+      ```kotlin  
+      private val geofencePendingIntent: PendingIntent by lazy {  
+      val intent = Intent(this, GeofenceBroadcastReceiver::class.java)  
+      intent.action = ACTION_GEOFENCE_EVENT  
+      val pendingFlags = if (Build.VERSION.SDK_INT >= 23) {  
+      PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE  
+      } else {  
+      PendingIntent.FLAG_UPDATE_CURRENT  
+      }  
+      PendingIntent.getBroadcast(this, 0, intent, pendingFlags)  
       }
-      ```
 
-7. **Criar um PendingIntent**:
-    - Crie um `PendingIntent` para lidar com as transições de geofence.
-      ```java
-      private PendingIntent getGeofencePendingIntent() {
-          Intent intent = new Intent(this, GeofenceBroadcastReceiver.class);
-          return PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+```  `enter code here`
+
+**Implementar BroadcastReceiver**:
+
+
+- Crie uma classe que estende `BroadcastReceiver` para lidar com os eventos de transição da geofence.
+   ```kotlin  
+    class GeofenceBroadcastReceiver : BroadcastReceiver() {  
+      override fun onReceive(context: Context, intent: Intent) {
+      ....
       }
-      ```
 
-8. **Implementar BroadcastReceiver**:
-    - Crie uma classe que estende `BroadcastReceiver` para lidar com os eventos de transição da geofence.
-      ```java
-      public class GeofenceBroadcastReceiver extends BroadcastReceiver {
-          @Override
-          public void onReceive(Context context, Intent intent) {
-              GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
-              if (geofencingEvent.hasError()) {
-                  // Lidar com erro
-                  return;
-              }
- 
-              int geofenceTransition = geofencingEvent.getGeofenceTransition();
-              if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
-                  geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-                  // Lidar com transição de geofence
-              }
-          }
-      }
-      ```
-
+``
 
 Referências:
 
-https://www.gps-coordinates.net/  
-https://developer.android.com/develop/sensors-and-location/location/geofencing#kotlin  
-https://www.kodeco.com/7372-geofencing-api-tutorial-for-android/page/2
+https://www.gps-coordinates.net/ https://developer.android.com/develop/sensors-and-location/location/geofencing#kotlin https://www.kodeco.com/7372-geofencing-api-tutorial-for-android/page/2
+
+
+
