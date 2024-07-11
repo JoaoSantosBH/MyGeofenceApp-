@@ -13,7 +13,7 @@ data class AddressMapsApiRequest(
     companion object {
         val FAKE_API = AddressMapsApiRequest(
             address = "Rua Aristóteles Caldeira 368",
-            key = "AIzaSyAD5TSQ5oxjdGNW5mI54JWbwAFB6hil2sM",
+            key = "U_SECRET_KEY",
             sensor = false
         )
     }
