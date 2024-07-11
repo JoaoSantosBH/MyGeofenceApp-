@@ -189,7 +189,9 @@ class MainActivity : ComponentActivity() {
                         Button(onClick = {
 
                             runBlocking {
-                                val response = KtorClient.getAddressLocation(AddressMapsApiRequest.FAKE_API)
+
+                                val response = KtorClient.getAddressLocation(AddressMapsApiRequest.FAKE_API.copy(address = address))
+                                Log.d(TAG, "onCreate: ${response.results?.get(0)?.geometry}")
                                 val location = response.results?.get(0)?.geometry?.location
                                 if (location != null) addMyLocation(location, name)
 
@@ -257,6 +259,7 @@ class MainActivity : ComponentActivity() {
 
 
     fun addMyLocation(location: UserLocation, name: String = DEFAULT_NAME_LOCATION) {
+        Log.d(TAG, "addMyLocation: $location.")
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -276,6 +279,7 @@ class MainActivity : ComponentActivity() {
         )
         Toast.makeText(this, "Geofence added 100m radius => $location", Toast.LENGTH_SHORT)
             .show()
+        Log.d(TAG, "addMyLocation: $location")
         registerGeofences(applicationContext, geofencePendingIntent)
 
 

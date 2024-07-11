@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">MyGeoFenceApp</string>
-    <string name="apikey">YOUR_API_KEY</string>
+    <string name="apikey">AIzaSyAD5TSQ5oxjdGNW5mI54JWbwAFB6hil2sM</string>
     <string name="geofence_transition_invalid_type">invalid type</string>
     <string name="geofence_transition_entered">Entrando na geofence</string>
     <string name="geofence_transition_exited">Saindo da Geofence\n</string>
