@@ -5,7 +5,6 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
-import android.location.Location
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -41,7 +40,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -55,13 +53,10 @@ import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
+import com.jomar.poc.mygeofenceeapp.model.GeofenceModel
 import com.jomar.poc.mygeofenceeapp.model.request.AddressMapsApiRequest
+import com.jomar.poc.mygeofenceeapp.model.response.UserLocation
 import com.jomar.poc.mygeofenceeapp.remote.KtorClient
-import com.google.android.gms.location.Priority
-import com.google.android.gms.tasks.CancellationToken
-import com.google.android.gms.tasks.CancellationTokenSource
-import com.google.android.gms.tasks.OnTokenCanceledListener
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
@@ -189,16 +184,30 @@ class MainActivity : ComponentActivity() {
 
                         Spacer(modifier = Modifier.height(20.dp))
                         val isEnabled = remember { mutableStateOf(true) }
-                        var name by remember { mutableStateOf("") }
+                        var address by remember { mutableStateOf(EMPTY_STRING) }
+                        var name by remember { mutableStateOf(EMPTY_STRING) }
                         Button(onClick = {
-                            addMyLocation(name)
+
+                            runBlocking {
+                                val response = KtorClient.getAddressLocation(AddressMapsApiRequest.FAKE_API)
+                                val location = response.results?.get(0)?.geometry?.location
+                                if (location != null) addMyLocation(location, name)
+
+                            }
+
                             isEnabled.value = false
 
                         }, enabled = isEnabled.value) {
-                            Text(text = "Adicionar um local")
+                            Text(text = "Adicione o  endereço")
                         }
                         Spacer(modifier = Modifier.height(20.dp))
 
+                        TextField(
+                            value = address,
+                            onValueChange = { address = it },
+                            label = { Text("Endereço") }
+
+                        )
                         TextField(
                             value = name,
                             onValueChange = { name = it },
@@ -246,7 +255,8 @@ class MainActivity : ComponentActivity() {
 
     }
 
-    fun addMyLocation(name: String = "MyLocation") {
+
+    fun addMyLocation(location: UserLocation, name: String = DEFAULT_NAME_LOCATION) {
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -257,40 +267,18 @@ class MainActivity : ComponentActivity() {
         ) {
             return
         }
-        fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, object : CancellationToken() {
-            override fun onCanceledRequested(listener: OnTokenCanceledListener) = CancellationTokenSource().token
+        addMyActualCustomLocation(
+            GeofenceModel(
+                id = name,
+                latitude = location.lat ?: 0.0,
+                longitude = location.lng?: 0.0
+            )
+        )
+        Toast.makeText(this, "Geofence added 100m radius => $location", Toast.LENGTH_SHORT)
+            .show()
+        registerGeofences(applicationContext, geofencePendingIntent)
 
-            override fun isCancellationRequested() = false
-        })
-            .addOnSuccessListener { location: Location? ->
-                if (location == null)
-                    Toast.makeText(this, "Cannot get location.", Toast.LENGTH_SHORT).show()
-                else {
-                    Log.d(TAG, "addMyLocation: $location")
-                    runBlocking {
-                        stopGeoFences(geofencePendingIntent)
-                    }
 
-                    addMyActualCustomLocation(
-                        GeofenceModel(
-                            id = name,
-                            latitude = location.latitude ,
-                            longitude = location.longitude,
-                            altitude = location.altitude
-                        )
-                    )
-                    Toast.makeText(this, "Geofence added 100m radius => $location", Toast.LENGTH_SHORT)
-                        .show()
-                    registerGeofences(applicationContext, geofencePendingIntent)
-                }
-
-            }
-
-        runBlocking {
-           val response = KtorClient.getAddressLocation(AddressMapsApiRequest.FAKE_API)
-           val location =  response.results?.get(0)?.geometry?.location
-            location
-}
     }
 
 

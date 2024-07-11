@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 
 data class Geometry(
     @SerializedName("bounds") val bounds: Bounds? = Bounds(),
-    @SerializedName("location") val location: Location? = Location(),
+    @SerializedName("location") val location: UserLocation? = UserLocation(),
     @SerializedName("location_type") val locationType: String? = EMPTY_STRING,
     @SerializedName("viewport") val viewport: Viewport? = Viewport()
 )
