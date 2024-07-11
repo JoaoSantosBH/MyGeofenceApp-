@@ -43,8 +43,23 @@ fun populateGeoFanceList() {
                 .build()
         )
     }
+}
 
-
+fun addMyActualCustomLocation(customGeofence: GeofenceModel) {
+    geofenceList.clear()
+    Log.d(TAG, "addMyActualCustomLocation")
+        geofenceList.add(
+            Geofence.Builder()
+                .setRequestId(customGeofence.id)
+                .setCircularRegion(
+                    customGeofence.latitude,
+                    customGeofence.longitude,
+                    customGeofence.radius
+                )
+                .setExpirationDuration(GEOFENCE_EXPIRATION_IN_MILLISECONDS)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
+                .build()
+        )
 }
 
 @RequiresApi(Build.VERSION_CODES.Q)
@@ -63,6 +78,7 @@ fun registerGeofences(applicationContext: Context, geofencePendingIntent: Pendin
     geofencingClient.addGeofences(getGeofencingRequest(), geofencePendingIntent).run {
         addOnSuccessListener {
             Log.d(TAG, "Geofences added")
+            Log.d(TAG, "Geofences size list ${geofenceList.size}")
         }
         addOnFailureListener {
             Log.d(TAG, "Geofences failed")
