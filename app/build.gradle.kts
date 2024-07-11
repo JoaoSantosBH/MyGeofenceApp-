@@ -1,6 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.0.20-Beta2"
+
+
 }
 
 android {
@@ -50,7 +53,13 @@ android {
 }
 
 dependencies {
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
 
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.gson)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

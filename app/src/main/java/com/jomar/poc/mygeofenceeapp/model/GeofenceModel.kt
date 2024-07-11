@@ -1,7 +1,9 @@
-package com.jomar.poc.mygeofenceeapp
+package com.jomar.poc.mygeofenceeapp.model
+
+import com.jomar.poc.mygeofenceeapp.EMPTY_STRING
 
 data class GeofenceModel(
-    val id: String = "",
+    val id: String = EMPTY_STRING,
     val latitude: Double,
     val longitude: Double,
     val altitude: Double,
@@ -12,8 +14,8 @@ data class GeofenceModel(
 
         val MINHA_CASA = GeofenceModel(
             id = "HOME",
-            latitude = -19.9304847003089,
-            longitude = -43.96641273294185,
+            latitude = -19.9301908,
+            longitude = -43.9666872,
             altitude = 2.0)
         val CASA_CAROL = GeofenceModel(
             id = "CAROL APTO",

@@ -47,7 +47,10 @@ import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
+import com.jomar.poc.mygeofenceeapp.model.request.AddressMapsApiRequest
+import com.jomar.poc.mygeofenceeapp.remote.KtorClient
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 lateinit var geofencingClient: GeofencingClient
 
@@ -192,7 +195,6 @@ class MainActivity : ComponentActivity() {
                     }
                     if (shouldDirectUserToApplicationSettings) {
                         openApplicationSettings(this, packageName)
-                        val context = LocalContext.current
                     }
                 }
             }
@@ -203,7 +205,11 @@ class MainActivity : ComponentActivity() {
             populateGeoFanceList()
         }
         registerGeofences(applicationContext, geofencePendingIntent)
-
+        runBlocking {
+           val response = KtorClient.getAddressLocation(AddressMapsApiRequest.FAKE_API)
+           val location =  response.results?.get(0)?.geometry?.location
+            location
+}
     }
 
 
@@ -235,11 +241,7 @@ class MainActivity : ComponentActivity() {
 
         locationSettingsResponseTask.addOnFailureListener { exception ->
             if (exception is ResolvableApiException && resolve) {
-                // Location settings are not satisfied, but this can be fixed
-                // by showing the user a dialog.
                 try {
-                    // Show the dialog by calling startResolutionForResult(),
-                    // and check the result in onActivityResult().
                     exception.startResolutionForResult(
                         this@MainActivity,
                         REQUEST_TURN_DEVICE_LOCATION_ON
