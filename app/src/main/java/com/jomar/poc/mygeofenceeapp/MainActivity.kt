@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -163,6 +164,46 @@ class MainActivity : ComponentActivity() {
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        Spacer(modifier = Modifier.height(20.dp))
+                        val isEnabled = remember { mutableStateOf(true) }
+                        var address by remember { mutableStateOf(EMPTY_STRING) }
+                        var addedAddress by remember { mutableStateOf("Endereço adicionado") }
+                        var name by remember { mutableStateOf(EMPTY_STRING) }
+                        Text(addedAddress)
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        TextField(
+                            value = address,
+                            onValueChange = { address = it },
+                            label = { Text("Endereço") }
+
+                        )
+                        TextField(
+                            value = name,
+                            onValueChange = { name = it },
+                            label = { Text("Nome do local") }
+
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Button(
+                            onClick = {
+                                runBlocking {
+                                    val response = KtorClient().getAddressLocation(
+                                        AddressMapsApiRequest.MODEL_API.copy(address = address)
+                                    )
+                                    val location = response.results?.get(0)?.geometry?.location
+                                    addedAddress = if (response.results?.get(0)?.formattedAddress?.isEmpty() == true)  EMPTY_STRING else response.results?.get(0)?.formattedAddress.toString()
+                                    if (location != null) addMyLocation(location, name)
+                                }
+
+                                isEnabled.value = false
+
+                            }, enabled = isEnabled.value
+                        ) {
+                            Text(text = "+ Geofence")
+                        }
+                        Spacer(modifier = Modifier.height(20.dp))
                         Text(
                             modifier = Modifier
                                 .padding(contentPadding)
@@ -180,43 +221,7 @@ class MainActivity : ComponentActivity() {
                             fontWeight = FontWeight.Bold
                         )
                     }
-                    Column {
 
-                        Spacer(modifier = Modifier.height(20.dp))
-                        val isEnabled = remember { mutableStateOf(true) }
-                        var address by remember { mutableStateOf(EMPTY_STRING) }
-                        var name by remember { mutableStateOf(EMPTY_STRING) }
-                        Button(onClick = {
-
-                            runBlocking {
-
-                                val response = KtorClient.getAddressLocation(AddressMapsApiRequest.FAKE_API.copy(address = address))
-                                Log.d(TAG, "onCreate: ${response.results?.get(0)?.geometry}")
-                                val location = response.results?.get(0)?.geometry?.location
-                                if (location != null) addMyLocation(location, name)
-
-                            }
-
-                            isEnabled.value = false
-
-                        }, enabled = isEnabled.value) {
-                            Text(text = "Adicione o  endereço")
-                        }
-                        Spacer(modifier = Modifier.height(20.dp))
-
-                        TextField(
-                            value = address,
-                            onValueChange = { address = it },
-                            label = { Text("Endereço") }
-
-                        )
-                        TextField(
-                            value = name,
-                            onValueChange = { name = it },
-                            label = { Text("Nome do local") }
-
-                        )
-                    }
 
                     Log.d(TAG, "shouldShowPermissionRationale: $shouldShowPermissionRationale")
                     if (shouldShowPermissionRationale) {
@@ -254,7 +259,6 @@ class MainActivity : ComponentActivity() {
             populateGeoFanceList()
         }
         registerGeofences(applicationContext, geofencePendingIntent)
-
     }
 
 
@@ -274,7 +278,7 @@ class MainActivity : ComponentActivity() {
             GeofenceModel(
                 id = name,
                 latitude = location.lat ?: 0.0,
-                longitude = location.lng?: 0.0
+                longitude = location.lng ?: 0.0
             )
         )
         Toast.makeText(this, "Geofence added 100m radius => $location", Toast.LENGTH_SHORT)

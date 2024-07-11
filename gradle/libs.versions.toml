@@ -10,6 +10,7 @@ kotlinxSerializationJson = "1.5.1"
 ktorClientCio = "2.3.12"
 ktorClientContentNegotiation = "2.3.12"
 ktorClientCore = "2.3.12"
+ktorClientLogging = "2.3.12"
 ktorSerializationKotlinxJson = "2.3.12"
 lifecycleRuntimeKtx = "2.8.2"
 activityCompose = "1.8.0"
@@ -18,6 +19,7 @@ playServicesLocation = "21.3.0"
 playServicesMaps = "19.0.0"
 appcompat = "1.7.0"
 serialization = "2.0.20-Beta2"
+slf4jAndroid = "1.7.36"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -39,10 +41,12 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktorClientCio" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktorClientContentNegotiation" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktorClientCore" }
+ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktorClientLogging" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorSerializationKotlinxJson" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+slf4j-android = { module = "org.slf4j:slf4j-android", version.ref = "slf4jAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

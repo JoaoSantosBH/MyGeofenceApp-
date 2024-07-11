@@ -7,6 +7,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AddresMapsResponse(
-    @SerializedName("results") val results: List<Result>? = listOf(),
+    @SerializedName("results") val results: List<AddressResult>? = listOf(),
     @SerializedName("status") val status: String? = EMPTY_STRING
 )
