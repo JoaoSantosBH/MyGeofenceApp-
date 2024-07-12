@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -172,11 +173,11 @@ class MainActivity : ComponentActivity() {
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Image(painter = painterResource(id = R.drawable.gol_icon ), contentDescription = null)
+                        Image(painter = painterResource(id = R.drawable.gol_icon ), contentDescription = null, modifier = Modifier.size(100.dp))
                         Spacer(modifier = Modifier.height(20.dp))
                         val isEnabled = remember { mutableStateOf(true) }
                         var address by remember { mutableStateOf(EMPTY_STRING) }
-                        var addedAddress by remember { mutableStateOf("Endereço adicionado") }
+                        var addedAddress by remember { mutableStateOf(EMPTY_STRING) }
                         var name by remember { mutableStateOf(EMPTY_STRING) }
                         Text(addedAddress)
 
@@ -205,13 +206,12 @@ class MainActivity : ComponentActivity() {
                                         val location = response.results?.get(0)?.geometry?.location
                                         addedAddress = if (response.results?.get(0)?.formattedAddress?.isEmpty() == true)  EMPTY_STRING else response.results?.get(0)?.formattedAddress.toString()
                                         if (location != null) addMyLocation(location, name)
+                                        isEnabled.value = false
                                     } else {
                                         Toast.makeText(this@MainActivity, "Endereço não encontrado", Toast.LENGTH_SHORT).show()
                                         isEnabled.value = true
                                     }
                                 }
-
-                                isEnabled.value = false
 
                             }, enabled = isEnabled.value
                         ) {
