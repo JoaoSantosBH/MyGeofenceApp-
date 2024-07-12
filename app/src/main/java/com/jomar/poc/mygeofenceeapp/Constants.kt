@@ -14,3 +14,4 @@ const val NOTIFICATION_ID = 3333
 const val REQUEST_TURN_DEVICE_LOCATION_ON = 29
 const val INSTURCTION_MSG = "Digite no campo endereço o endereço e a cidade que deseja adicionar"
 const val INSTURCTION_MSG2 = " Ex: Rua Brumadinho 223, Belo Horizonte"
+const val PARAM_KTOR_CLIENT = "ktor client"

@@ -15,6 +15,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -41,7 +43,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -58,6 +62,8 @@ import com.jomar.poc.mygeofenceeapp.model.GeofenceModel
 import com.jomar.poc.mygeofenceeapp.model.request.AddressMapsApiRequest
 import com.jomar.poc.mygeofenceeapp.model.response.UserLocation
 import com.jomar.poc.mygeofenceeapp.remote.KtorClient
+import com.jomar.poc.mygeofenceeapp.ui.theme.Pink40
+import com.jomar.poc.mygeofenceeapp.ui.theme.Purple80
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
@@ -160,10 +166,13 @@ class MainActivity : ComponentActivity() {
                     SnackbarHost(hostState = snackbarHostState)
                 }) { contentPadding ->
                     Column(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Pink40),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        Image(painter = painterResource(id = R.drawable.gol_icon ), contentDescription = null)
                         Spacer(modifier = Modifier.height(20.dp))
                         val isEnabled = remember { mutableStateOf(true) }
                         var address by remember { mutableStateOf(EMPTY_STRING) }
@@ -182,7 +191,7 @@ class MainActivity : ComponentActivity() {
                         TextField(
                             value = name,
                             onValueChange = { name = it },
-                            label = { Text("Nome do local") }
+                            label = { Text("Nome da geofance") }
 
                         )
                         Spacer(modifier = Modifier.height(20.dp))
@@ -192,9 +201,14 @@ class MainActivity : ComponentActivity() {
                                     val response = KtorClient().getAddressLocation(
                                         AddressMapsApiRequest.MODEL_API.copy(address = address)
                                     )
-                                    val location = response.results?.get(0)?.geometry?.location
-                                    addedAddress = if (response.results?.get(0)?.formattedAddress?.isEmpty() == true)  EMPTY_STRING else response.results?.get(0)?.formattedAddress.toString()
-                                    if (location != null) addMyLocation(location, name)
+                                    if (response.results?.isEmpty() != true){
+                                        val location = response.results?.get(0)?.geometry?.location
+                                        addedAddress = if (response.results?.get(0)?.formattedAddress?.isEmpty() == true)  EMPTY_STRING else response.results?.get(0)?.formattedAddress.toString()
+                                        if (location != null) addMyLocation(location, name)
+                                    } else {
+                                        Toast.makeText(this@MainActivity, "Endereço não encontrado", Toast.LENGTH_SHORT).show()
+                                        isEnabled.value = true
+                                    }
                                 }
 
                                 isEnabled.value = false

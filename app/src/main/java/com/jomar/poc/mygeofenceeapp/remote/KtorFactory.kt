@@ -16,20 +16,16 @@ fun getClient(): HttpClient {
 
         install(Logging) {
             logger = Logger.DEFAULT
-            level = LogLevel.ALL
-            filter { request ->
-                request.url.host.contains("https://")
-            }
+            level = LogLevel.BODY
+//            filter { request ->
+//                request.url.host.contains("https://")
+//            }
         }
 
         install(ContentNegotiation) {
             register(
                 ContentType.Any, KotlinxSerializationConverter(
-                    Json {
-                        prettyPrint = true
-                        isLenient = true
-                        ignoreUnknownKeys = true
-                    }
+                    Json
                 )
             )
         }

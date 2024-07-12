@@ -2,13 +2,14 @@ package com.jomar.poc.mygeofenceeapp.model.response
 
 
 import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 
 data class UserLocation(
-    @SerializedName("lat") val lat: Double? = null,
-    @SerializedName("lng") val lng: Double? = null
+    @SerialName("lat") val lat: Double? = null,
+    @SerialName("lng") val lng: Double? = null
 ) {
     companion object {
 
