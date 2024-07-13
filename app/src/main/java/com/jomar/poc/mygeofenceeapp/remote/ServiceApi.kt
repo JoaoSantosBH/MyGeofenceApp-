@@ -5,6 +5,6 @@ import com.jomar.poc.mygeofenceeapp.model.response.AddresMapsResponse
 
 interface ServiceApi {
 
-    suspend fun getAddressLocation(request: AddressMapsApiRequest): AddresMapsResponse
+    suspend fun getAddressLocation(request: AddressMapsApiRequest): ApiResponse
 
 }

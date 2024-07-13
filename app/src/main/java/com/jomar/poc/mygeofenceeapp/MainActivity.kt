@@ -8,7 +8,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -25,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -44,13 +44,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
+import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.google.android.gms.common.api.ResolvableApiException
@@ -62,9 +63,9 @@ import com.google.android.gms.location.LocationSettingsRequest
 import com.jomar.poc.mygeofenceeapp.model.GeofenceModel
 import com.jomar.poc.mygeofenceeapp.model.request.AddressMapsApiRequest
 import com.jomar.poc.mygeofenceeapp.model.response.UserLocation
+import com.jomar.poc.mygeofenceeapp.remote.ApiResponse
 import com.jomar.poc.mygeofenceeapp.remote.KtorClient
 import com.jomar.poc.mygeofenceeapp.ui.theme.Pink40
-import com.jomar.poc.mygeofenceeapp.ui.theme.Purple80
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
@@ -173,12 +174,17 @@ class MainActivity : ComponentActivity() {
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Image(painter = painterResource(id = R.drawable.gol_icon ), contentDescription = null, modifier = Modifier.size(100.dp))
+                        Image(
+                            painter = painterResource(id = R.drawable.gol_icon),
+                            contentDescription = null,
+                            modifier = Modifier.size(100.dp)
+                        )
                         Spacer(modifier = Modifier.height(20.dp))
                         val isEnabled = remember { mutableStateOf(true) }
                         var address by remember { mutableStateOf(EMPTY_STRING) }
                         var addedAddress by remember { mutableStateOf(EMPTY_STRING) }
-                        var name by remember { mutableStateOf(EMPTY_STRING) }
+                        var radius by remember { mutableStateOf(EMPTY_STRING) }
+
                         Text(addedAddress)
 
                         Spacer(modifier = Modifier.height(20.dp))
@@ -190,28 +196,79 @@ class MainActivity : ComponentActivity() {
 
                         )
                         TextField(
-                            value = name,
-                            onValueChange = { name = it },
-                            label = { Text("Nome da geofance") }
-
+                            value = radius,
+                            onValueChange = { if (it.isDigitsOnly()) radius = it },
+                            label = { Text("Raio da geofance em metros") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true
                         )
                         Spacer(modifier = Modifier.height(20.dp))
                         Button(
                             onClick = {
-                                runBlocking {
-                                    val response = KtorClient().getAddressLocation(
-                                        AddressMapsApiRequest.MODEL_API.copy(address = address)
-                                    )
-                                    if (response.results?.isEmpty() != true){
-                                        val location = response.results?.get(0)?.geometry?.location
-                                        addedAddress = if (response.results?.get(0)?.formattedAddress?.isEmpty() == true)  EMPTY_STRING else response.results?.get(0)?.formattedAddress.toString()
-                                        if (location != null) addMyLocation(location, name)
-                                        isEnabled.value = false
-                                    } else {
-                                        Toast.makeText(this@MainActivity, "Endereço não encontrado", Toast.LENGTH_SHORT).show()
-                                        isEnabled.value = true
+
+                                if (radius.isEmpty()) {
+                                    Toast.makeText(
+                                        this@MainActivity,
+                                        "Por favor informe os dados",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+
+                                } else {
+                                    runBlocking {
+                                        val response = KtorClient().getAddressLocation(
+                                            AddressMapsApiRequest.MODEL_API.copy(address = address)
+                                        )
+
+                                        when (response) {
+                                            is ApiResponse.Success -> {
+                                                if (response.data.status != "ZERO_RESULTS") {
+                                                    val location =
+                                                        response.data.results?.get(0)?.geometry?.location
+                                                    addedAddress =
+                                                        if (response.data.results?.get(0)?.formattedAddress?.isEmpty() == true) EMPTY_STRING else response.data.results?.get(
+                                                            0
+                                                        )?.formattedAddress.toString()
+                                                    if (location != null) addMyLocation(
+                                                        location,
+                                                        radius
+                                                    )
+                                                    isEnabled.value = false
+                                                } else  {
+                                                    Toast.makeText(
+                                                        this@MainActivity,
+                                                        "Endereço não encontrado",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                    isEnabled.value = true
+                                                }
+
+                                            }
+
+                                            is ApiResponse.Failure -> {
+                                                Toast.makeText(
+                                                    this@MainActivity,
+                                                    response.error.toString(),
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                                isEnabled.value = true
+                                            }
+                                        }
+
+//                                        if (response.results?.isEmpty() != true){
+//                                            val location = response.results?.get(0)?.geometry?.location
+//                                            addedAddress = if (response.results?.get(0)?.formattedAddress?.isEmpty() == true)  EMPTY_STRING else response.results?.get(0)?.formattedAddress.toString()
+//                                            if (location != null) addMyLocation(location, radius)
+//                                            isEnabled.value = false
+//                                        } else if(response.results.equals(ApiError.CLIENT_ERROR)) {
+//                                            Toast.makeText(this@MainActivity, "400 error", Toast.LENGTH_SHORT).show()
+//                                        }
+//                                        else {
+//                                            Toast.makeText(this@MainActivity, "Endereço não encontrado", Toast.LENGTH_SHORT).show()
+//                                            isEnabled.value = true
+//                                        }
                                     }
                                 }
+
 
                             }, enabled = isEnabled.value
                         ) {
@@ -276,7 +333,7 @@ class MainActivity : ComponentActivity() {
     }
 
 
-    fun addMyLocation(location: UserLocation, name: String = DEFAULT_NAME_LOCATION) {
+    fun addMyLocation(location: UserLocation, radius: String = DEFAULT_NAME_LOCATION) {
         Log.d(TAG, "addMyLocation: $location.")
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -288,11 +345,13 @@ class MainActivity : ComponentActivity() {
         ) {
             return
         }
+
         addMyActualCustomLocation(
             GeofenceModel(
-                id = name,
+                id = DEFAULT_NAME_LOCATION,
                 latitude = location.lat ?: 0.0,
-                longitude = location.lng ?: 0.0
+                longitude = location.lng ?: 0.0,
+                radius = radius.toFloat()
             )
         )
         Toast.makeText(this, "Geofence added 100m radius => $location", Toast.LENGTH_SHORT)

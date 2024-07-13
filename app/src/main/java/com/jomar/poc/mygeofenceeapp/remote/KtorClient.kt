@@ -15,7 +15,7 @@ import java.io.IOException
 open class KtorClient : ServiceApi {
 
 
-    override suspend fun getAddressLocation(request: AddressMapsApiRequest): AddresMapsResponse {
+    override suspend fun getAddressLocation(request: AddressMapsApiRequest): ApiResponse { // sealed class com states
         val client = getClient()
         val result = try {
             client.get(MAPS_BASE_URL) {
@@ -29,23 +29,22 @@ open class KtorClient : ServiceApi {
                     append(HttpHeaders.UserAgent, PARAM_KTOR_CLIENT)
                 }
             }
-
-
         } catch (e: IOException) {
-            throw ApiException(ApiError.SERVICE_UNAVAILABLE)
+            return ApiResponse.Failure(ApiError.SERVICE_UNAVAILABLE)
         }
-
         when(result.status.value){
             in 200..299 -> Unit
-            500 -> throw ApiException(ApiError.SERVER_ERROR)
-            in 400..499 -> throw ApiException(ApiError.CLIENT_ERROR)
-            else -> throw ApiException(ApiError.UNKNOWN_ERROR)
+            500 -> return ApiResponse.Failure(ApiError.SERVER_ERROR)
+            in 400..499 -> return ApiResponse.Failure(ApiError.CLIENT_ERROR)
+            else -> return ApiResponse.Failure(ApiError.UNKNOWN_ERROR)
         }
 
         return try {
-            result.body<AddresMapsResponse>()
-        } catch(e: Exception) {
-            throw ApiException(ApiError.SERVER_ERROR)
+            ApiResponse.Success(result.body<AddresMapsResponse>())
+        } catch (e: Exception) {
+            ApiResponse.Failure(ApiError.SERVER_ERROR)
+        } catch (e: IOException) {
+            ApiResponse.Failure(ApiError.SERVICE_UNAVAILABLE)
         }
         finally {
             client.close()

@@ -71,8 +71,6 @@ fun registerGeofences(applicationContext: Context, geofencePendingIntent: Pendin
             Manifest.permission.ACCESS_FINE_LOCATION
         ) != PackageManager.PERMISSION_GRANTED
     ) {
-        // TODO: Consider calling
-        //    ActivityCompat#requestPermissions
         Log.d(TAG, "registerGeofences: PERMISSION_DENIED")
         return
     }
