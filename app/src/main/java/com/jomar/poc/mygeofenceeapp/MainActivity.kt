@@ -156,7 +156,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
             )
-
             val scope = rememberCoroutineScope()
             val snackbarHostState = remember { SnackbarHostState() }
 
@@ -233,7 +232,7 @@ class MainActivity : ComponentActivity() {
                                                         radius
                                                     )
                                                     isEnabled.value = false
-                                                } else  {
+                                                } else {
                                                     Toast.makeText(
                                                         this@MainActivity,
                                                         "Endereço não encontrado",
@@ -253,19 +252,6 @@ class MainActivity : ComponentActivity() {
                                                 isEnabled.value = true
                                             }
                                         }
-
-//                                        if (response.results?.isEmpty() != true){
-//                                            val location = response.results?.get(0)?.geometry?.location
-//                                            addedAddress = if (response.results?.get(0)?.formattedAddress?.isEmpty() == true)  EMPTY_STRING else response.results?.get(0)?.formattedAddress.toString()
-//                                            if (location != null) addMyLocation(location, radius)
-//                                            isEnabled.value = false
-//                                        } else if(response.results.equals(ApiError.CLIENT_ERROR)) {
-//                                            Toast.makeText(this@MainActivity, "400 error", Toast.LENGTH_SHORT).show()
-//                                        }
-//                                        else {
-//                                            Toast.makeText(this@MainActivity, "Endereço não encontrado", Toast.LENGTH_SHORT).show()
-//                                            isEnabled.value = true
-//                                        }
                                     }
                                 }
 
