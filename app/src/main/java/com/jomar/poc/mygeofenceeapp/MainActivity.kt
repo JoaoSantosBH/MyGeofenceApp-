@@ -75,8 +75,8 @@ lateinit var geofencingClient: GeofencingClient
 @RequiresApi(Build.VERSION_CODES.Q)
 
 class MainActivity : ComponentActivity() {
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val geofencePendingIntent: PendingIntent by lazy {
         val intent = Intent(this, GeofenceBroadcastReceiver::class.java)
         intent.action = ACTION_GEOFENCE_EVENT
