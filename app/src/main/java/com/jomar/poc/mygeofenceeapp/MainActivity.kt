@@ -17,6 +17,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,6 +25,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -60,12 +62,22 @@ import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.pay.Pay
+import com.google.android.gms.pay.PayApiAvailabilityStatus
+import com.google.android.gms.pay.PayClient
+import com.google.wallet.button.ButtonType
+import com.google.wallet.button.WalletButton
 import com.jomar.poc.mygeofenceeapp.model.GeofenceModel
 import com.jomar.poc.mygeofenceeapp.model.request.AddressMapsApiRequest
 import com.jomar.poc.mygeofenceeapp.model.response.UserLocation
 import com.jomar.poc.mygeofenceeapp.remote.ApiResponse
 import com.jomar.poc.mygeofenceeapp.remote.KtorClient
 import com.jomar.poc.mygeofenceeapp.ui.theme.Pink40
+import com.jomar.poc.mygeofenceeapp.wallet.createWalletClassJson
+import com.jomar.poc.mygeofenceeapp.wallet.createWalletObjJson
+import com.jomar.poc.mygeofenceeapp.wallet.getJwtObj
+import com.jomar.poc.mygeofenceeapp.wallet.pass.newTemptative.w_class.FlightClasse.Companion.getFakeFlightClasse
+import com.jomar.poc.mygeofenceeapp.wallet.pass.newTemptative.w_obj.WalletObjRequest.Companion.getFakeWalletObjRequest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
@@ -75,6 +87,9 @@ lateinit var geofencingClient: GeofencingClient
 @RequiresApi(Build.VERSION_CODES.Q)
 
 class MainActivity : ComponentActivity() {
+
+    //WALLET
+    private lateinit var walletClient: PayClient
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val geofencePendingIntent: PendingIntent by lazy {
@@ -93,6 +108,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        //WALLET
+        // TODO: Instantiate the client
+        walletClient = Pay.getClient(this)
 
         setContent {
             val hasAllPermissions = hasAllPermissions(this, geoFencePermissions)
@@ -158,7 +177,7 @@ class MainActivity : ComponentActivity() {
             )
             val scope = rememberCoroutineScope()
             val snackbarHostState = remember { SnackbarHostState() }
-
+            fetchCanUseGoogleWalletApi()
             Surface(
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.background
@@ -277,6 +296,29 @@ class MainActivity : ComponentActivity() {
                             textAlign = TextAlign.Center,
                             fontWeight = FontWeight.Bold
                         )
+                        Spacer(modifier = Modifier.padding(20.dp))
+//WALLET
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                // Default
+                                WalletButton(onClick = {
+                                        addToGoogleWallet()
+
+                                })
+
+                                // Customized look
+                                WalletButton(onClick = { addToGoogleWallet() }, modifier = Modifier.width(350.dp))
+
+                                // Condensed version
+                                WalletButton(onClick = {  addToGoogleWallet()}, type = ButtonType.AddCondensed)
+                            }
+                        }
+
                     }
 
 
@@ -364,6 +406,64 @@ class MainActivity : ComponentActivity() {
         internal const val ACTION_GEOFENCE_EVENT =
             "MainActivity.action.ACTION_GEOFENCE_EVENT"
     }
+
+    //WALLET
+    // TODO: Create a method to check for the Google Wallet SDK and API
+    private fun fetchCanUseGoogleWalletApi() {
+        walletClient
+            .getPayApiAvailabilityStatus(PayClient.RequestType.SAVE_PASSES)
+            .addOnSuccessListener { status ->
+                if (status == PayApiAvailabilityStatus.AVAILABLE) {
+            //TODO show button
+                    Toast.makeText(this, "Google Wallet SDK is available", Toast.LENGTH_SHORT).show()
+                }
+
+            }
+            .addOnFailureListener {
+                // Hide the button and optionally show an error message
+                Toast.makeText(this, "Google Wallet SDK is not available", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun addToGoogleWallet() {
+        walletClient.savePassesJwt(token, this, addToGoogleWalletRequestCode)
+        val jsonClass = createWalletClassJson(getFakeFlightClasse())
+        val jsonObject = createWalletObjJson(getFakeWalletObjRequest())
+        val jwt = getJwtObj(jsonClass,jsonObject)
+        walletClient.savePasses(jwt.toString(), this, addToGoogleWalletRequestCode)
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == addToGoogleWalletRequestCode) {
+            when (resultCode) {
+                RESULT_OK -> {
+                    // Pass saved successfully. Consider informing the user.
+                    Toast.makeText(this, "Pass saved successfully", Toast.LENGTH_SHORT).show()
+                }
+
+                RESULT_CANCELED -> { // ADICIONAR UM  JWT não assinado com o objet
+                    // Save canceled
+                    Toast.makeText(this, "Save canceled", Toast.LENGTH_SHORT).show()
+                }
+
+                PayClient.SavePassesResult.SAVE_ERROR ->
+                    data?.let { intentData ->
+                        val errorMessage = intentData.getStringExtra(PayClient.EXTRA_API_ERROR_MESSAGE)
+                        // Handle error. Consider informing the user.
+                        Log.e("SavePassesResult", errorMessage.toString())
+                    }
+
+                else -> {
+                    // Handle unexpected (non-API) exception
+                    Toast.makeText(this, "Something went wrong", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+    //WALLET END
 
     private fun checkDeviceLocationSettingsAndStartGeofence(resolve: Boolean = true) {
         val locationRequest = LocationRequest.create().apply {
