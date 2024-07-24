@@ -56,7 +56,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
@@ -68,8 +67,6 @@ import com.jomar.poc.mygeofenceeapp.remote.KtorClient
 import com.jomar.poc.mygeofenceeapp.ui.theme.Pink40
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-
-lateinit var geofencingClient: GeofencingClient
 
 
 @RequiresApi(Build.VERSION_CODES.Q)
