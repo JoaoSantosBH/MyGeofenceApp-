@@ -34,10 +34,10 @@ fun checkAndRequestLocationPermissions(
         }
     ) {
         // Use location because permissions are already granted
-        Log.d(TAG, "checkAndRequestLocationPermissions: PERMISSION_GRANTED")
+        Log.d(GEO_TAG, "checkAndRequestLocationPermissions: PERMISSION_GRANTED")
     } else {
         // Request permissions
-        Log.d(TAG, "checkAndRequestLocationPermissions: PERMISSION_NOT_GRANTED")
+        Log.d(GEO_TAG, "checkAndRequestLocationPermissions: PERMISSION_NOT_GRANTED")
         launcher.launch(permissions)
     }
 }

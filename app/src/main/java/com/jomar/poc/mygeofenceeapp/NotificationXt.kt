@@ -16,7 +16,7 @@ fun sendNotification(context: Context, notificationDetails: String) {
         .setSmallIcon(R.drawable.ic_launcher_foreground)
         .setContentTitle("GEOFENCE POINT")
         .setContentText(notificationDetails)
-        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        .setPriority(NotificationCompat.PRIORITY_MAX)
         .setStyle(NotificationCompat.BigTextStyle()
             .bigText(notificationDetails))
     with(NotificationManagerCompat.from(context)) {
@@ -25,7 +25,7 @@ fun sendNotification(context: Context, notificationDetails: String) {
                 NotificationChannel(
                     CHANNEL_ID,
                     CHANNEL_ID,
-                    NotificationManager.IMPORTANCE_HIGH
+                    NotificationManager.IMPORTANCE_MAX
                 )
             )
         }

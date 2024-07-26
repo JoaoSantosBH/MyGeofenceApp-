@@ -1,9 +1,6 @@
 package com.jomar.poc.mygeofenceeapp
 
 import android.Manifest
-import android.app.PendingIntent
-import android.content.Intent
-import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -54,11 +51,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.LocationSettingsRequest
 import com.jomar.poc.mygeofenceeapp.model.GeofenceModel
 import com.jomar.poc.mygeofenceeapp.model.request.AddressMapsApiRequest
 import com.jomar.poc.mygeofenceeapp.model.response.UserLocation
@@ -74,22 +68,23 @@ import kotlinx.coroutines.runBlocking
 class MainActivity : ComponentActivity() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private val geofencePendingIntent: PendingIntent by lazy {
-        val intent = Intent(this, GeofenceBroadcastReceiver::class.java)
-        intent.action = ACTION_GEOFENCE_EVENT
-        val pendingFlags = if (Build.VERSION.SDK_INT >= 23) {
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-        } else {
-            PendingIntent.FLAG_UPDATE_CURRENT
-        }
-        PendingIntent.getBroadcast(this, 0, intent, pendingFlags)
-    }
+
+//    private val geofencePendingIntent: PendingIntent by lazy {
+//        val intent = Intent(applicationContext, GeofenceBroadcastReceiver::class.java)
+//        intent.action = ACTION_GEOFENCE_EVENT
+//        val pendingFlags = if (Build.VERSION.SDK_INT >= 23) {
+//            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+//        } else {
+//            PendingIntent.FLAG_UPDATE_CURRENT
+//        }
+//        PendingIntent.getBroadcast(this, 0, intent, pendingFlags)
+//    }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(applicationContext)
 
         setContent {
             val hasAllPermissions = hasAllPermissions(this, geoFencePermissions)
@@ -277,7 +272,7 @@ class MainActivity : ComponentActivity() {
                     }
 
 
-                    Log.d(TAG, "shouldShowPermissionRationale: $shouldShowPermissionRationale")
+                    Log.d(GEO_TAG, "shouldShowPermissionRationale: $shouldShowPermissionRationale")
                     if (shouldShowPermissionRationale) {
 
                         LaunchedEffect(true) {
@@ -308,16 +303,22 @@ class MainActivity : ComponentActivity() {
             }
 
         }
-        geofencingClient = geofencingClient(this)
+        startGeofence()
+    }
+
+    private fun startGeofence() {
+        geofencingClient = geofencingClient(applicationContext)
+        Log.d(GEO_TAG, "geofencingClient MainActivity: $geofencingClient")
+
         if (geofenceList.isEmpty()) {
             populateGeoFanceList()
         }
-        registerGeofences(applicationContext, geofencePendingIntent)
+        registerGeofences(applicationContext)
     }
 
 
     fun addMyLocation(location: UserLocation, radius: String = DEFAULT_NAME_LOCATION) {
-        Log.d(TAG, "addMyLocation: $location.")
+        Log.d(GEO_TAG, "addMyLocation: $location.")
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -339,8 +340,8 @@ class MainActivity : ComponentActivity() {
         )
         Toast.makeText(this, "Geofence added 100m radius => $location", Toast.LENGTH_SHORT)
             .show()
-        Log.d(TAG, "addMyLocation: $location")
-        registerGeofences(applicationContext, geofencePendingIntent)
+        Log.d(GEO_TAG, "addMyLocation: $location")
+        registerGeofences(applicationContext)
 
 
     }
@@ -348,12 +349,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        stopGeoFences(geofencePendingIntent)
+        stopGeoFences()
     }
 
     override fun onStart() {
         super.onStart()
-        checkDeviceLocationSettingsAndStartGeofence()
+        checkDeviceLocationSettingsAndStartGeofence(applicationContext)
 
     }
 
@@ -362,37 +363,5 @@ class MainActivity : ComponentActivity() {
             "MainActivity.action.ACTION_GEOFENCE_EVENT"
     }
 
-    private fun checkDeviceLocationSettingsAndStartGeofence(resolve: Boolean = true) {
-        val locationRequest = LocationRequest.create().apply {
-            priority = LocationRequest.PRIORITY_LOW_POWER
-        }
-        val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
 
-        val settingsClient = LocationServices.getSettingsClient(this)
-        val locationSettingsResponseTask =
-            settingsClient.checkLocationSettings(builder.build())
-
-        locationSettingsResponseTask.addOnFailureListener { exception ->
-            if (exception is ResolvableApiException && resolve) {
-                try {
-                    exception.startResolutionForResult(
-                        this@MainActivity,
-                        REQUEST_TURN_DEVICE_LOCATION_ON
-                    )
-                } catch (sendEx: IntentSender.SendIntentException) {
-                    Log.d(TAG, "Error geting location settings resolution: " + sendEx.message)
-                }
-            } else {
-                Log.d(TAG, "checkDeviceLocationSettingsAndStartGeofence: FAILED $exception")
-            }
-        }
-        locationSettingsResponseTask.addOnCompleteListener {
-            if (it.isSuccessful) {
-                if (geofenceList.isEmpty()) {
-                    populateGeoFanceList()
-                }
-                Log.d(TAG, "checkDeviceLocationSettingsAndStartGeofence: SUCCESS")
-            }
-        }
-    }
 }

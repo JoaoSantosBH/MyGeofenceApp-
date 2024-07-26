@@ -15,7 +15,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
 
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d(TAG, "onReceive")
+        Log.d(GEO_TAG, "onReceive")
         Toast.makeText(context, "onReceive", Toast.LENGTH_SHORT).show()
 
         if (intent.action == ACTION_GEOFENCE_EVENT) {
@@ -24,7 +24,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
                 if (geofencingEvent.hasError()) {
                     val errorMessage = GeofenceStatusCodes
                         .getStatusCodeString(geofencingEvent.errorCode)
-                    Log.d(TAG, "Error $errorMessage")
+                    Log.d(GEO_TAG, "Error $errorMessage")
                     return
                 }
             }
@@ -39,7 +39,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
                     triggeringGeofences
                 )
                 sendNotification(context, geofenceTransitionDetails)
-                Log.d(TAG, geofenceTransitionDetails)
+                Log.d(GEO_TAG, geofenceTransitionDetails)
                 Toast.makeText(
                     context,
                     "Geofences onReceive $geofenceTransitionDetails",
@@ -49,7 +49,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             } else {
                 Toast.makeText(context, "Geofences error", Toast.LENGTH_SHORT).show()
                 val x = context.getString(R.string.geofence_transition_invalid_type)
-                Log.d(TAG, x)
+                Log.d(GEO_TAG, x)
             }
         }
 

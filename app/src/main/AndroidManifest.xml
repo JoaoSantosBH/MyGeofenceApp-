@@ -42,7 +42,7 @@
             android:exported="true"
             android:permission="android.permission.ACCESS_FINE_LOCATION" />
 
-        <!--Permissao para reeber device started-->
+        <!--Permissao para receber device rebooted-->
         <receiver
             android:name=".receiver.BootReceiver"
             android:enabled="true"
@@ -51,9 +51,8 @@
 
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </receiver><!--Permissao para reeber device started-->
+        </receiver><!--Permissao para reeber device rebooted-->
 
         <service android:name=".GeofenceTransitionsJobService"
             android:exported="true"
