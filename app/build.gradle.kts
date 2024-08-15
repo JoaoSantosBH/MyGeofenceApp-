@@ -7,6 +7,7 @@ plugins {
 android {
     namespace = "com.jomar.poc.mygeofenceeapp"
     compileSdk = 34
+    buildFeatures.buildConfig = true
 
     defaultConfig {
         applicationId = "com.jomar.poc.mygeofenceeapp"
@@ -22,7 +23,18 @@ android {
     }
 
     buildTypes {
-        release {
+
+        getByName("release") {
+            buildConfigField("String", "API_KEY", "\"${properties["API_KEY"]}\"")
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+
+        getByName("debug") {
+            buildConfigField("String", "API_KEY", "\"${properties["API_KEY"]}\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -30,6 +42,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
