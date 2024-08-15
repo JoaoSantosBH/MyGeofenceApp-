@@ -31,8 +31,8 @@ data class GeofenceModel(
 
         val DR_IVAN_DENTISTA = GeofenceModel(
             id = "IVAN DENTISTA",
-            latitude = -19.923595713,
-            longitude = -43.944977803
+            latitude = -19.9298106,
+            longitude = -43.9340675
         )
 
         val ESCOLA = GeofenceModel(

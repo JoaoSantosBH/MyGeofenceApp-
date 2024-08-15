@@ -25,7 +25,7 @@ fun sendNotification(context: Context, notificationDetails: String) {
                 NotificationChannel(
                     CHANNEL_ID,
                     CHANNEL_ID,
-                    NotificationManager.IMPORTANCE_MAX
+                    NotificationManager.IMPORTANCE_HIGH
                 )
             )
         }
