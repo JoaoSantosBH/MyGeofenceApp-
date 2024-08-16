@@ -53,15 +53,18 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.jomar.poc.mygeofenceeapp.model.GeofenceJsonItemResponse
 import com.jomar.poc.mygeofenceeapp.model.GeofenceModel
 import com.jomar.poc.mygeofenceeapp.model.request.AddressMapsApiRequest
 import com.jomar.poc.mygeofenceeapp.model.response.UserLocation
 import com.jomar.poc.mygeofenceeapp.remote.ApiResponse
 import com.jomar.poc.mygeofenceeapp.remote.KtorClient
+import com.jomar.poc.mygeofenceeapp.ui.SharedPreferencesUtil.addNewGeofenceToSharedPrefs
+import com.jomar.poc.mygeofenceeapp.ui.SharedPreferencesUtil.getJsonFromSharedPreferences
+import com.jomar.poc.mygeofenceeapp.ui.SharedPreferencesUtil.saveJsonToSharedPreferences
 import com.jomar.poc.mygeofenceeapp.ui.theme.Pink40
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-
 
 @RequiresApi(Build.VERSION_CODES.Q)
 
@@ -83,6 +86,15 @@ class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        //Criar lista mock inicial do app
+        val mock = getJsonMockList()
+        //Salvar lista no shared
+        val muSharedList = getJsonFromSharedPreferences(applicationContext, GEO_LIST_KEY)
+        if (muSharedList == null) saveJsonToSharedPreferences(applicationContext,GEO_LIST_KEY, mock)
+////
+
+
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(applicationContext)
 
@@ -173,11 +185,19 @@ class MainActivity : ComponentActivity() {
                         Spacer(modifier = Modifier.height(20.dp))
                         val isEnabled = remember { mutableStateOf(true) }
                         var address by remember { mutableStateOf(EMPTY_STRING) }
+                        var name by remember { mutableStateOf(EMPTY_STRING) }
                         var addedAddress by remember { mutableStateOf(EMPTY_STRING) }
                         var radius by remember { mutableStateOf(EMPTY_STRING) }
 
                         Text(addedAddress)
+                        Spacer(modifier = Modifier.height(20.dp))
 
+                        TextField(
+                            value = name ,
+                            onValueChange = { name = it },
+                            label = { Text("Nome da Localização") }
+
+                        )
                         Spacer(modifier = Modifier.height(20.dp))
 
                         TextField(
@@ -212,7 +232,14 @@ class MainActivity : ComponentActivity() {
 
                                         when (response) {
                                             is ApiResponse.Success -> {
-                                                if (response.data.status != "ZERO_RESULTS") {
+                                                if (response.data.status == "REQUEST_DENIED") {
+                                                    Toast.makeText(
+                                                        this@MainActivity,
+                                                        "REQUEST_DENIED",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                    isEnabled.value = true
+                                                } else if (response.data.status != "ZERO_RESULTS" && response.data.status != "REQUEST_DENIED") {
                                                     val location =
                                                         response.data.results?.get(0)?.geometry?.location
                                                     addedAddress =
@@ -220,6 +247,7 @@ class MainActivity : ComponentActivity() {
                                                             0
                                                         )?.formattedAddress.toString()
                                                     if (location != null) addMyLocation(
+                                                        name,
                                                         location,
                                                         radius
                                                     )
@@ -238,7 +266,7 @@ class MainActivity : ComponentActivity() {
                                             is ApiResponse.Failure -> {
                                                 Toast.makeText(
                                                     this@MainActivity,
-                                                    response.error.toString(),
+                                                    response.exception.toString().drop(49).substring(0,32),
                                                     Toast.LENGTH_SHORT
                                                 ).show()
                                                 isEnabled.value = true
@@ -272,7 +300,7 @@ class MainActivity : ComponentActivity() {
                     }
 
 
-                    Log.d(GEO_TAG, "shouldShowPermissionRationale: $shouldShowPermissionRationale")
+//                    Log.d(GEO_TAG, "shouldShowPermissionRationale: $shouldShowPermissionRationale")
                     if (shouldShowPermissionRationale) {
 
                         LaunchedEffect(true) {
@@ -306,18 +334,24 @@ class MainActivity : ComponentActivity() {
         startGeofence()
     }
 
+
+
     private fun startGeofence() {
         geofencingClient = geofencingClient(applicationContext)
         Log.d(GEO_TAG, "geofencingClient MainActivity: $geofencingClient")
 
+         val mapper = getMappedGeoFences(applicationContext)
+
         if (geofenceList.isEmpty()) {
-            populateGeoFanceList()
+            if (mapper != null) {
+                populateGeoFanceList(mapper)
+            }
         }
         registerGeofences(applicationContext)
     }
 
 
-    fun addMyLocation(location: UserLocation, radius: String = DEFAULT_NAME_LOCATION) {
+    fun addMyLocation(name: String, location: UserLocation, radius: String = DEFAULT_NAME_LOCATION) {
         Log.d(GEO_TAG, "addMyLocation: $location.")
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -329,20 +363,24 @@ class MainActivity : ComponentActivity() {
         ) {
             return
         }
-
-        addMyActualCustomLocation(
-            GeofenceModel(
-                id = DEFAULT_NAME_LOCATION,
-                latitude = location.lat ?: 0.0,
-                longitude = location.lng ?: 0.0,
-                radius = radius.toFloat()
-            )
+        val newLocation = GeofenceModel(
+            id = name ?: DEFAULT_NAME_LOCATION,
+            latitude = location.lat ?: 0.0,
+            longitude = location.lng ?: 0.0,
+            radius = radius.toFloat()
         )
+        addMyActualCustomLocation(newLocation)
+        val geofenceModel = GeofenceJsonItemResponse(
+            id = newLocation.id,
+            latitude = newLocation.latitude,
+            longitude = newLocation.longitude,
+            radius = newLocation.radius
+        )
+        addNewGeofenceToSharedPrefs(applicationContext, geofenceModel)
         Toast.makeText(this, "Geofence added 100m radius => $location", Toast.LENGTH_SHORT)
             .show()
         Log.d(GEO_TAG, "addMyLocation: $location")
         registerGeofences(applicationContext)
-
 
     }
 

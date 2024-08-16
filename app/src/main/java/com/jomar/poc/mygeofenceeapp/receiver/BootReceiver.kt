@@ -8,6 +8,7 @@ import com.jomar.poc.mygeofenceeapp.GEO_TAG
 import com.jomar.poc.mygeofenceeapp.checkDeviceLocationSettingsAndStartGeofence
 import com.jomar.poc.mygeofenceeapp.geofenceList
 import com.jomar.poc.mygeofenceeapp.geofencingClient
+import com.jomar.poc.mygeofenceeapp.getMappedGeoFences
 import com.jomar.poc.mygeofenceeapp.populateGeoFanceList
 import com.jomar.poc.mygeofenceeapp.registerGeofences
 
@@ -29,10 +30,15 @@ class BootReceiver : BroadcastReceiver() {
 
     private fun startGeofence(context: Context) {
         if (geofenceList.isEmpty()) {
-            populateGeoFanceList()
+            val mapper = getMappedGeoFences(context.applicationContext)
+            if (geofenceList.isEmpty()) {
+                if (mapper != null) {
+                    populateGeoFanceList(mapper)
+                }
+
+            }
+            registerGeofences(context.applicationContext)
         }
-        registerGeofences(context.applicationContext)
+
     }
-
-
 }

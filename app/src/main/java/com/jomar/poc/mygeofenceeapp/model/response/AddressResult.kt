@@ -12,5 +12,6 @@ data class AddressResult(
     @SerialName("formatted_address") val formattedAddress: String?= EMPTY_STRING,
     @SerialName("geometry") val geometry: Geometry? = Geometry(),
     @SerialName("place_id") val placeId: String? = EMPTY_STRING,
+    @SerializedName("plus_code") val plusCode: PlusCode? = PlusCode(),
     @SerialName("types") val types: List<String>? = listOf()
 )

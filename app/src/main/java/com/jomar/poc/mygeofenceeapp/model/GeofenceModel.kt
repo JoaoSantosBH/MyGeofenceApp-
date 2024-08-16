@@ -1,6 +1,15 @@
 package com.jomar.poc.mygeofenceeapp.model
 
+import com.google.gson.annotations.SerializedName
 import com.jomar.poc.mygeofenceeapp.EMPTY_STRING
+
+class GeofenceJsonResponse : ArrayList<GeofenceJsonItemResponse>()
+data class GeofenceJsonItemResponse(
+    @SerializedName("id") val id: String? = EMPTY_STRING,
+    @SerializedName("latitude") val latitude: Double? = null,
+    @SerializedName("longitude") val longitude: Double? = null,
+    @SerializedName("radius") val radius: Float? = null,
+)
 
 data class GeofenceModel(
     val id: String = EMPTY_STRING,
@@ -10,6 +19,15 @@ data class GeofenceModel(
 ) {
 
     companion object {
+
+        fun GeofenceJsonResponse.toDomain() = this.map { it.toDomain() }
+
+        fun GeofenceJsonItemResponse.toDomain() = GeofenceModel(
+            id = this.id ?: EMPTY_STRING,
+            latitude = this.latitude ?: 0.0,
+            longitude = this.longitude ?: 0.0,
+            radius = this.radius ?: 100f
+        )
 
         val MINHA_CASA = GeofenceModel(
             id = "HOME",

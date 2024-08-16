@@ -26,7 +26,10 @@ fun getClient(): HttpClient {
         install(ContentNegotiation) {
             register(
                 ContentType.Any, KotlinxSerializationConverter(
-                    Json
+                    Json{
+                        isLenient = true
+                        ignoreUnknownKeys = true
+                    }
                 )
             )
         }

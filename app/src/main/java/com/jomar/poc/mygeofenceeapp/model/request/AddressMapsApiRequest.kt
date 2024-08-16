@@ -1,5 +1,7 @@
 package com.jomar.poc.mygeofenceeapp.model.request
 
+import com.jomar.poc.mygeofenceeapp.EMPTY_STRING
+
 
 data class AddressMapsApiRequest(
     val address: String,
@@ -12,8 +14,8 @@ data class AddressMapsApiRequest(
 ) {
     companion object {
         val MODEL_API = AddressMapsApiRequest(
-            address = "Rua Aristóteles Caldeira 368",
-            key = "U_SECRET_KEY",
+            address = EMPTY_STRING,
+            key = EMPTY_STRING,
             sensor = false
         )
     }

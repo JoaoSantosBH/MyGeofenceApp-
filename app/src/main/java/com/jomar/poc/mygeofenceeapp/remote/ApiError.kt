@@ -9,11 +9,11 @@ enum class ApiError {
     UNKNOWN_ERROR
 }
 
-class ApiException(val error: ApiError): Exception(
-    "An error occurred when fetching daata: $error"
+class ApiException(val error: String): Exception(
+    "$error"
 )
 
 sealed class ApiResponse {
     data class Success(val data: AddresMapsResponse): ApiResponse()
-    data class Failure(val error: ApiError): ApiResponse()
+    data class Failure(val error: ApiError, val exception: ApiException): ApiResponse()
 }

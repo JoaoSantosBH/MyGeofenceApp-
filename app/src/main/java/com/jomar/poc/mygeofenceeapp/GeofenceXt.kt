@@ -20,6 +20,8 @@ import com.google.android.gms.location.LocationSettingsRequest
 import com.jomar.poc.mygeofenceeapp.MainActivity.Companion.ACTION_GEOFENCE_EVENT
 import com.jomar.poc.mygeofenceeapp.model.GeofenceModel
 import com.jomar.poc.mygeofenceeapp.model.GeofenceModel.Companion.ALL_GEOFENCES
+import com.jomar.poc.mygeofenceeapp.model.GeofenceModel.Companion.toDomain
+import com.jomar.poc.mygeofenceeapp.ui.SharedPreferencesUtil.getJsonFromSharedPreferences
 
 
 lateinit var geofencingClient: GeofencingClient
@@ -38,16 +40,16 @@ fun decideCurrentPermissionStatus(
 }
 
 
-fun populateGeoFanceList() {
+fun populateGeoFanceList(allGeofences: List<GeofenceModel> = ALL_GEOFENCES) {
         Log.d(GEO_TAG, "populateGeoFanceList")
-    for (i in 0..ALL_GEOFENCES.size -1 ){
+    for (i in 0..allGeofences.size -1 ){
         geofenceList.add(
             Geofence.Builder()
-                .setRequestId(ALL_GEOFENCES[i].id)
+                .setRequestId(allGeofences[i].id)
                 .setCircularRegion(
-                    ALL_GEOFENCES[i].latitude,
-                    ALL_GEOFENCES[i].longitude,
-                    ALL_GEOFENCES[i].radius
+                    allGeofences[i].latitude,
+                    allGeofences[i].longitude,
+                    allGeofences[i].radius
                 )
                 .setExpirationDuration(GEOFENCE_EXPIRATION_IN_MILLISECONDS)
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
@@ -103,7 +105,8 @@ fun registerGeofences(applicationContext: Context) {
             Log.d(GEO_TAG, "Geofences size list $geofenceList")
         }
         addOnFailureListener {
-            Log.d(GEO_TAG, "Geofences failed")
+
+            Log.d(GEO_TAG, "Geofences failed: ${it.message}")
         }
     }
 
@@ -155,9 +158,19 @@ fun checkDeviceLocationSettingsAndStartGeofence(context: Context, resolve: Boole
     locationSettingsResponseTask.addOnCompleteListener {
         if (it.isSuccessful) {
             if (geofenceList.isEmpty()) {
-                populateGeoFanceList()
+                val mapper = getMappedGeoFences(context)
+
+                if (mapper != null) {
+                    populateGeoFanceList(mapper)
+                }
             }
             Log.d(GEO_TAG, "checkDeviceLocationSettingsAndStartGeofence: SUCCESS")
         }
     }
+}
+ fun getMappedGeoFences(context: Context): List<GeofenceModel>? {
+    val result = getJsonFromSharedPreferences(context.applicationContext, GEO_LIST_KEY)
+    val mList = geofenceJsonModel(result)
+    val mapper = mList?.toDomain()
+    return mapper
 }
